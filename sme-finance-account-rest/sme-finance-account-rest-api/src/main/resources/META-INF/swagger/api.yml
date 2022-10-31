@@ -1,0 +1,219 @@
+# API-first development with OpenAPI
+# This file will be used at compile time to generate Spring-MVC endpoint stubs using openapi-generator
+openapi: '3.0.1'
+info:
+  title: 'SME Finance Account'
+  version: 0.0.1
+servers:
+  - url: http://localhost:8081/api
+    description: Development server
+  - url: https://localhost:8081/api
+    description: Development server with TLS Profile
+tags:
+  - name: Public
+    description: The public API exposed
+  - name: AccountService
+    description: Everything related to account
+paths:
+  /accounts/{id}/check-status:
+    get:
+      summary: Check account status by ID
+      operationId: checkAccountStatusById
+      tags:
+        - Public
+        - AccountService
+      parameters:
+        - name: id
+          in: path
+          description: ID of account
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Check Account status response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckAccountStatusResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '500':
+          $ref: '#/components/responses/Problem'
+  /accounts/{id}/check-balance:
+    get:
+      summary: Check account balance by ID
+      operationId: checkAccountBalanceById
+      tags:
+        - Public
+        - AccountService
+      parameters:
+        - name: id
+          in: path
+          description: ID of account
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Check Account balance response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountExchange'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '500':
+          $ref: '#/components/responses/Problem'
+
+  /accounts/update-balance:
+    put:
+      summary: Update account balance
+      operationId: updateAccountBalance
+      tags:
+        - Public
+        - AccountService
+      requestBody:
+        description: Request to debit or credit account balance
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAccountBalanceRequest'
+      responses:
+        '200':
+          description: Account balance updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountExchange'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '500':
+          $ref: '#/components/responses/Problem'
+
+components:
+  responses:
+    BadRequestResponse:
+      description: Requested resource not found
+      content:
+        'application/problem+json':
+          schema:
+            $ref: 'https://opensource.zalando.com/problem/schema.yaml#/Problem'
+
+    NotFoundResponse:
+      description: Requested resource not found
+      content:
+        'application/problem+json':
+          schema:
+            $ref: 'https://opensource.zalando.com/problem/schema.yaml#/Problem'
+
+    Problem:
+      description: error occurred - see status code and problem object for more information.
+      content:
+        'application/problem+json':
+          schema:
+            $ref: 'https://opensource.zalando.com/problem/schema.yaml#/Problem'
+
+  schemas:
+    AccountStatus:
+      type: string
+      description: Indicates status of the account
+      enum:
+        - OPEN
+        - CLOSED
+
+    CheckAccountStatusResponse:
+      type: object
+      description: Account status check response
+      properties:
+        id:
+          type: integer
+          format: int64
+        status:
+          $ref: '#/components/schemas/AccountStatus'
+
+    BalanceOperationType:
+      type: string
+      enum:
+        - DEBIT
+        - CREDIT
+
+    UpdateAccountBalanceRequest:
+      type: object
+      description: Request to credit the account
+      required:
+        - id
+        - balance
+        - currency
+        - type
+      properties:
+        id:
+          type: integer
+          format: int64
+        balance:
+          type: number
+          format: double
+          minimum: 0
+        currency:
+          type: string
+          example: 978
+          description: 3-digit ISO 4217 currency code
+          pattern: '^\d{3}$'
+        operationType:
+          $ref: '#/components/schemas/BalanceOperationType'
+
+    AccountExchange:
+      type: object
+      required:
+        - accountNumber
+        - currency
+        - balance
+        - status
+      properties:
+        id:
+          type: integer
+          format: int64
+        accountNumber:
+          type: string
+          example: 1000123
+          description: Account number
+          minimum: 1
+          maximum: 255
+        currency:
+          type: string
+          example: 978
+          description: 3-digit ISO 4217 currency code
+          pattern: '^\d{3}$'
+        balance:
+          type: number
+          minimum: 0
+          format: double
+          example: 14.56
+          description: Balance of the account
+        status:
+          $ref: '#/components/schemas/AccountStatus'
+
+  securitySchemes:
+    oauth:
+      type: oauth2
+      description: OAuth2 authentication with KeyCloak
+      flows:
+        authorizationCode:
+          authorizationUrl: http://localhost:9080/realms/sme-finance/protocol/openid-connect/auth
+          tokenUrl: http://localhost:9080/realms/sme-finance/protocol/openid-connect/token
+          scopes:
+            smeFinance: SME Finance specific claims
+            email: Email claims
+            profile: Profile claims
+    openId:
+      type: openIdConnect
+      description: OpenID Connect authentication with KeyCloak
+      openIdConnectUrl: http://localhost:9080/realms/sme-finance/.well-known/openid-configuration
+security:
+  - oauth: [ smeFinance, email, profile ]
+  - openId: [ smeFinance, email, profile ]

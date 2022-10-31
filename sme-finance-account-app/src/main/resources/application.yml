@@ -1,0 +1,41 @@
+server:
+  port: ${APP_PORT:8081}
+
+spring:
+  application:
+    name: sme-finance-account-app
+
+  sql:
+    init:
+      platform: postgres
+
+  jpa:
+    show-sql: true
+    generate-ddl: false
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+    hibernate:
+      ddl-auto: none
+
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/sme-finance-account-db}
+    username: ${DATABASE_USER:postgres}
+    password: ${DATABASE_PASS:postgres}
+    hikari:
+      pool-name: sme-finance-account-ds-pool
+      auto-commit: false
+      minimum-idle: 2
+
+  liquibase:
+    enabled: ${ENABLE_LIQUIBASE:true}
+    change-log: classpath:db.changelog/db.changelog-master.xml
+
+logging:
+  level:
+    root: INFO
+    org.hibernate.event: INFO
+    org.springframework.orm.jpa: INFO
+    org.hibernate.SQL: DEBUG

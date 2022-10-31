@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <!-- create tables -->
+    <changeSet id="1666956968908-1" author="sme-finance-account">
+        <createTable tableName="account">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="account_pkey"/>
+            </column>
+            <column name="account_number" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency" type="VARCHAR(3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="balance" type="numeric(19, 2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- create sequence -->
+    <changeSet id="1666957411943-1" author="sme-finance-account">
+        <createSequence cacheSize="1" cycle="false" dataType="bigint" minValue="1" maxValue="9223372036854775807"
+                        sequenceName="ACCOUNT_SEQ" startValue="1" incrementBy="1"/>
+    </changeSet>
+
+    <!-- create indices -->
+    <changeSet id="1667155713874-1" author="sme-finance-account">
+        <createIndex tableName="account" indexName="account_account_number_index">
+            <column name="account_number"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
