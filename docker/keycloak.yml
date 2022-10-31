@@ -1,0 +1,43 @@
+version: '3.8'
+services:
+  keycloak-postgresql:
+    image: postgres:${KEYCLOAK_DB_VER:-14.5}
+    container_name: keycloak-postgresql
+    environment:
+      - POSTGRES_DB=${KEYCLOAK_DB_NAME:-keycloak}
+      - POSTGRES_USER=${KEYCLOAK_DB_USER:-keycloak}
+      - POSTGRES_PASSWORD=${KEYCLOAK_DB_PASS:-keycloak}
+    ports:
+      - "127.0.0.1:6432:5432"
+
+  keycloak:
+    image: jboss/keycloak:${KEYCLOAK_VER:-16.1.1}
+    container_name: keycloak
+    volumes:
+      - ./keycloak/realm-config:/opt/jboss/keycloak/realm-config
+      - ./keycloak/standalone-deployments:/opt/jboss/keycloak/standalone/deployments
+    command:
+      [
+        '-b',
+        '0.0.0.0',
+        '-Dkeycloak.migration.action=import',
+        '-Dkeycloak.migration.provider=dir',
+        '-Dkeycloak.migration.dir=/opt/jboss/keycloak/realm-config',
+        '-Dkeycloak.migration.strategy=IGNORE_EXISTING',
+        '-Djboss.socket.binding.port-offset=1000',
+        '-Dkeycloak.profile.feature.upload_scripts=enabled',
+      ]
+    environment:
+      - KEYCLOAK_USER=${KEYCLOAK_USER:-admin}
+      - KEYCLOAK_PASSWORD=${KEYCLOAK_PASS:-admin}
+      - DB_VENDOR=postgres
+      - DB_ADDR=keycloak-postgresql
+      - DB_PORT=5432
+      - DB_USER=${KEYCLOAK_DB_USER:-keycloak}
+      - DB_PASSWORD=${KEYCLOAK_DB_PASS:-keycloak}
+      - KEYCLOAK_STATISTICS=db,http
+    ports:
+      - "127.0.0.1:9080:9080"
+      - "127.0.0.1:9443:9443"
+    depends_on:
+      - keycloak-postgresql

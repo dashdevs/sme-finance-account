@@ -34,54 +34,54 @@ public class AccountService {
         Objects.requireNonNull(id, "id is required");
 
         return accountRepository.findById(id)
-                .map(accountMapper::toCheckAccountStatusResponse)
-                .orElseThrow(() -> {
-                    log.error(NO_ACCOUNT_FOUND_MESSAGE, id);
-                    return new NotFoundAlertException(ACCOUNT_ERROR_PREFIX, String.valueOf(id));
-                });
+            .map(accountMapper::toCheckAccountStatusResponse)
+            .orElseThrow(() -> {
+                log.error(NO_ACCOUNT_FOUND_MESSAGE, id);
+                return new NotFoundAlertException(ACCOUNT_ERROR_PREFIX, id);
+            });
     }
 
     public AccountExchange checkAccountBalance(final Long id) {
         Objects.requireNonNull(id, "id is required");
 
         return accountRepository.findById(id)
-                .map(accountMapper::toAccountExchange)
-                .orElseThrow(() -> {
-                    log.error(NO_ACCOUNT_FOUND_MESSAGE, id);
-                    return new NotFoundAlertException(ACCOUNT_ERROR_PREFIX, String.valueOf(id));
-                });
+            .map(accountMapper::toAccountExchange)
+            .orElseThrow(() -> {
+                log.error(NO_ACCOUNT_FOUND_MESSAGE, id);
+                return new NotFoundAlertException(ACCOUNT_ERROR_PREFIX, id);
+            });
     }
 
     @Transactional
     public AccountExchange updateAccountBalance(final UpdateAccountBalanceRequest request) {
         final AccountEntity entity = accountRepository.findById(request.getId())
-                .orElseThrow(() -> {
-                    log.error(NO_ACCOUNT_FOUND_MESSAGE, request.getId());
-                    return new NotFoundAlertException(ACCOUNT_ERROR_PREFIX, String.valueOf(request.getId()));
-                });
+            .orElseThrow(() -> {
+                log.error(NO_ACCOUNT_FOUND_MESSAGE, request.getId());
+                return new NotFoundAlertException(ACCOUNT_ERROR_PREFIX, request.getId());
+            });
 
         if (entity.getStatus() != AccountEntityStatus.OPEN) {
             log.error("Unable to operate on closed account={}", request.getId());
-            throw new BadRequestAlertException(ACCOUNT_ERROR_PREFIX, "Account must be OPEN", String.valueOf(request.getId()));
+            throw new BadRequestAlertException(String.format("Invalid account status={%s}", entity.getStatus()));
         }
 
         if (!entity.getCurrency().equals(request.getCurrency())) {
             log.error("Account={} doesn't support currency={}", request.getId(), request.getCurrency());
-            throw new UnsupportedCurrencyAlertException(ACCOUNT_ERROR_PREFIX, request.getCurrency());
+            throw new UnsupportedCurrencyAlertException(request.getCurrency());
         }
 
         if (request.getOperationType() == BalanceOperationType.CREDIT) {
             entity.setBalance(
-                    entity.getBalance().add(request.getBalance())
+                entity.getBalance().add(request.getBalance())
             );
         } else { // handle debit operation
             if (entity.getBalance().compareTo(request.getBalance()) < 0) {
-                log.error("Account={} has balance={} which is less than debit request: {}", entity.getId(), entity.getBalance(), request);
-                throw new InsufficientFundAlertException(ACCOUNT_ERROR_PREFIX, String.valueOf(request.getId()));
+                log.error("Account={} has balance={} which is less than debit request amount: {}", entity.getId(), entity.getBalance(), request.getBalance());
+                throw new InsufficientFundAlertException(request.getBalance());
             }
 
             entity.setBalance(
-                    entity.getBalance().subtract(request.getBalance())
+                entity.getBalance().subtract(request.getBalance())
             );
         }
 

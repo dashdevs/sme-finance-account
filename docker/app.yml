@@ -11,18 +11,18 @@ services:
       - SPRING_CLOUD_CONSUL_PORT=8500
       - SPRING_DATASOURCE_URL=jdbc:postgresql://sme-finance-account-postgresql:5432/sme-finance-account-db
       - SPRING_LIQUIBASE_URL=jdbc:postgresql://sme-finance-account-postgresql:5432/sme-finance-account-db
-      - SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_OIDC_ISSUER_URI=http://keycloak:9080/realms/jhipster
+      - SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_OIDC_ISSUER_URI=http://keycloak:9080/realms/sme-finance
       - SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_OIDC_CLIENT_ID=internal
       - SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_OIDC_CLIENT_SECRET=internal
 
   sme-finance-account-postgresql:
     image: postgres:14.5
     environment:
-      - POSTGRES_USER=sme-finance-account
-      - POSTGRES_PASSWORD=
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=sme-finance-account-db
       - POSTGRES_HOST_AUTH_METHOD=trust
-    # If you want to expose these ports outside your dev PC,
-    # remove the "127.0.0.1:" prefix
+    restart: always
     ports:
       - "127.0.0.1:5432:5432"
 

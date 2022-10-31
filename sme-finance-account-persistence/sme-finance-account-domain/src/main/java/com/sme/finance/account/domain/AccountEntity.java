@@ -40,7 +40,7 @@ public class AccountEntity {
     private String accountNumber;
 
     @NotNull
-    @Pattern(regexp = "^\\d{3}$")
+    @CurrencyCode
     @Column(name = "CURRENCY", nullable = false)
     private String currency;
 

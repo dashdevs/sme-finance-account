@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.sme.finance.account</groupId>
+        <artifactId>sme-finance-account</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>sme-finance-account-it-tests</artifactId>
+
+    <properties>
+        <skipTests>true</skipTests>
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>com.sme.finance.core</groupId>
+            <artifactId>sme-finance-core-it-tests</artifactId>
+            <scope>test</scope>
+            <type>test-jar</type>
+            <classifier>tests</classifier>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sme.finance.account</groupId>
+            <artifactId>sme-finance-account-app</artifactId>
+            <version>${project.parent.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <testExcludes>
+                        <testExclude>com/sme/finance/account/config/PostgreSqlTestContainer.java</testExclude>
+                    </testExcludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

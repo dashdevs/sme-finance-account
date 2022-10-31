@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  registry:
+    image: registry
+    hostname: registry
+    container_name: registry
+    restart: always
+    volumes:
+      - registery-data:/var/lib/registry
+    environment:
+      - REGISTRY_STORAGE_DELETE_ENABLED=true
+#    ports:
+#      - "15001:5000"
+    network_mode: host
+
+  registry-images:
+    image: parabuzzle/craneoperator
+    hostname: registry-images
+    container_name: registry-images
+    restart: always
+    environment:
+#      - REGISTRY_HOST=127.0.0.1
+#      - REGISTRY_PORT=15001
+      - ALLOW_REGISTRY_LOGIN=true
+      - REGISTRY_ALLOW_DELETE=true
+      - REGISTRY_PROTOCOL=http
+      - SSL_VERIFY=false
+#    ports:
+#      - "8089:80"
+    network_mode: host
+    depends_on:
+      - registry
+
+volumes:
+  registery-data:

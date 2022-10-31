@@ -62,8 +62,7 @@ class AccountServiceTest {
         NotFoundAlertException exception = assertThrows(NotFoundAlertException.class, () -> accountService.checkAccountStatus(1L));
 
         // Then
-        assertEquals("1", exception.getErrorKey());
-        assertEquals("Account", exception.getEntityName());
+        assertEquals("Not found: Account=1 doesn't exist", exception.getLocalizedMessage());
     }
 
     @Test
@@ -91,8 +90,7 @@ class AccountServiceTest {
         NotFoundAlertException exception = assertThrows(NotFoundAlertException.class, () -> accountService.checkAccountBalance(1L));
 
         // Then
-        assertEquals("1", exception.getErrorKey());
-        assertEquals("Account", exception.getEntityName());
+        assertEquals("Not found: Account=1 doesn't exist", exception.getLocalizedMessage());
     }
 
     @Test
@@ -105,8 +103,7 @@ class AccountServiceTest {
         NotFoundAlertException exception = assertThrows(NotFoundAlertException.class, () -> accountService.updateAccountBalance(request));
 
         // Then
-        assertEquals("1", exception.getErrorKey());
-        assertEquals("Account", exception.getEntityName());
+        assertEquals("Not found: Account=1 doesn't exist", exception.getLocalizedMessage());
     }
 
     @Test
@@ -121,8 +118,7 @@ class AccountServiceTest {
         BadRequestAlertException exception = assertThrows(BadRequestAlertException.class, () -> accountService.updateAccountBalance(request));
 
         // Then
-        assertEquals("1", exception.getErrorKey());
-        assertEquals("Account must be OPEN", exception.getEntityName());
+        assertEquals("Invalid request: Invalid account status={CLOSED}", exception.getLocalizedMessage());
     }
 
     @Test
@@ -137,8 +133,7 @@ class AccountServiceTest {
         UnsupportedCurrencyAlertException exception = assertThrows(UnsupportedCurrencyAlertException.class, () -> accountService.updateAccountBalance(request));
 
         // Then
-        assertEquals("314", exception.getErrorKey());
-        assertEquals("Account", exception.getEntityName());
+        assertEquals("Unsupported currency: Current account doesn't support currency={314}", exception.getLocalizedMessage());
     }
 
     @Test
@@ -159,8 +154,7 @@ class AccountServiceTest {
         InsufficientFundAlertException exception = assertThrows(InsufficientFundAlertException.class, () -> accountService.updateAccountBalance(request));
 
         // Then
-        assertEquals("1", exception.getErrorKey());
-        assertEquals("Account", exception.getEntityName());
+        assertEquals("Insufficient funds: Account balance is less than 10", exception.getLocalizedMessage());
     }
 
     @Test

@@ -8,6 +8,5 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=sme-finance-account-db
       - POSTGRES_HOST_AUTH_METHOD=trust
-    restart: always
     ports:
       - "127.0.0.1:5432:5432"

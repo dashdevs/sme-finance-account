@@ -33,38 +33,17 @@ spring:
     enabled: ${ENABLE_LIQUIBASE:true}
     change-log: classpath:db.changelog/db.changelog-master.xml
 
+  # Allow SecurityConfiguration to initialize w/o specifying an empty issuer-uri is OK
   security:
     oauth2:
       client:
         provider:
           oidc:
-            issuer-uri: http://localhost:10080/realms/sme-finance-user
-        registration:
-          oidc:
-            client-id: internal
-            client-secret: internal
-            scope: openid, profile, email, offline_access # last one for refresh tokens
+            issuer-uri: http://DO_NOT_CALL:10080/realms/sme-finance-user
 
-management:
-  endpoints:
-    web:
-      base-path: /management
-      exposure:
-        include:
-          [
-            'configprops',
-            'env',
-            'health',
-            'info',
-            'logfile',
-            'loggers',
-            'prometheus',
-            'threaddump',
-            'caches',
-            'liquibase',
-          ]
-  metrics:
-    export:
-      prometheus:
-        enabled: true
-        step: 60
+logging:
+  level:
+    root: INFO
+    org.hibernate.event: INFO
+    org.springframework.orm.jpa: INFO
+    org.hibernate.SQL: DEBUG
