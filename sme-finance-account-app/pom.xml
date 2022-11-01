@@ -14,8 +14,7 @@
     <properties>
         <mainClass>com.sme.finance.account.FinanceAccountApp</mainClass>
 
-        <docker.image.port>8081</docker.image.port>
-        <docker.image.name>sme-finance-account</docker.image.name>
+        <jib-maven-plugin.to.image>localhost:5000/sme-finance-account</jib-maven-plugin.to.image>
     </properties>
 
     <dependencies>
@@ -86,6 +85,12 @@
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-hibernate5</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sme.finance.core</groupId>
+            <artifactId>sme-finance-core-security</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
 
     </dependencies>

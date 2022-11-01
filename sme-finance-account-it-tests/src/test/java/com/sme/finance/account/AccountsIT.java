@@ -1,12 +1,14 @@
 package com.sme.finance.account;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sme.finance.account.config.TestSecurityConfiguration;
 import com.sme.finance.account.domain.AccountEntity;
 import com.sme.finance.account.domain.AccountEntityStatus;
 import com.sme.finance.account.repository.AccountRepository;
 import com.sme.finance.account.rest.model.AccountExchange;
 import com.sme.finance.account.rest.model.CheckAccountStatusResponse;
 import com.sme.finance.core.it.annotation.IntegrationTest;
+import com.sme.finance.core.security.AuthoritiesConstants;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.lang.reflect.Method;
@@ -31,7 +35,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @IntegrationTest
 @AutoConfigureMockMvc
-@SpringBootTest(classes = {FinanceAccountApp.class}, webEnvironment = RANDOM_PORT)
+@ActiveProfiles("test")
+@WithMockUser(authorities = AuthoritiesConstants.ADMIN)
+@SpringBootTest(classes = {FinanceAccountApp.class, TestSecurityConfiguration.class}, webEnvironment = RANDOM_PORT)
 class AccountsIT {
 
     @Autowired

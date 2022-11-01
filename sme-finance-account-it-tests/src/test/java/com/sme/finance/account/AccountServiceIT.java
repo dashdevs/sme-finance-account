@@ -1,5 +1,6 @@
 package com.sme.finance.account;
 
+import com.sme.finance.account.config.TestSecurityConfiguration;
 import com.sme.finance.account.domain.AccountEntity;
 import com.sme.finance.account.domain.AccountEntityStatus;
 import com.sme.finance.account.repository.AccountRepository;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -18,8 +20,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@ActiveProfiles("test")
 @IntegrationTest
-@SpringBootTest(classes = {FinanceAccountApp.class})
+@SpringBootTest(classes = {FinanceAccountApp.class, TestSecurityConfiguration.class})
 class AccountServiceIT {
 
     @Autowired

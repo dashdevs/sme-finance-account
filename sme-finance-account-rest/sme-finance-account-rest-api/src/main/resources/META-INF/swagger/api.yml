@@ -19,6 +19,9 @@ paths:
     get:
       summary: Check account status by ID
       operationId: checkAccountStatusById
+      security:
+        - oauth:
+            - smeFinance
       tags:
         - Public
         - AccountService
@@ -48,6 +51,9 @@ paths:
       tags:
         - Public
         - AccountService
+      security:
+        - oauth:
+            - smeFinance
       parameters:
         - name: id
           in: path
@@ -71,6 +77,9 @@ paths:
     put:
       summary: Update account balance
       operationId: updateAccountBalance
+      security:
+        - oauth:
+            - smeFinance
       tags:
         - Public
         - AccountService
@@ -203,8 +212,8 @@ components:
       description: OAuth2 authentication with KeyCloak
       flows:
         authorizationCode:
-          authorizationUrl: http://localhost:9080/realms/sme-finance/protocol/openid-connect/auth
-          tokenUrl: http://localhost:9080/realms/sme-finance/protocol/openid-connect/token
+          authorizationUrl: http://localhost:9080/auth/realms/sme-finance/protocol/openid-connect/auth
+          tokenUrl: http://localhost:9080/auth/realms/sme-finance/protocol/openid-connect/token
           scopes:
             smeFinance: SME Finance specific claims
             email: Email claims
@@ -212,7 +221,7 @@ components:
     openId:
       type: openIdConnect
       description: OpenID Connect authentication with KeyCloak
-      openIdConnectUrl: http://localhost:9080/realms/sme-finance/.well-known/openid-configuration
+      openIdConnectUrl: http://localhost:9080/auth/realms/sme-finance/.well-known/openid-configuration
 security:
   - oauth: [ smeFinance, email, profile ]
   - openId: [ smeFinance, email, profile ]

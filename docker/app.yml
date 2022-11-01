@@ -2,36 +2,71 @@
 version: '3.8'
 services:
   sme-finance-account-app:
-    image: sme-finance-account
+    image: localhost:5000/sme-finance-account:latest
+    container_name: sme-finance-account-app
     environment:
       - _JAVA_OPTIONS=-Xmx512m -Xms256m
-      - SPRING_PROFILES_ACTIVE=prod,api-docs
+      - SPRING_PROFILES_ACTIVE=prod
       - MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED=true
       - SPRING_CLOUD_CONSUL_HOST=consul
       - SPRING_CLOUD_CONSUL_PORT=8500
       - SPRING_DATASOURCE_URL=jdbc:postgresql://sme-finance-account-postgresql:5432/sme-finance-account-db
-      - SPRING_LIQUIBASE_URL=jdbc:postgresql://sme-finance-account-postgresql:5432/sme-finance-account-db
-      - SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_OIDC_ISSUER_URI=http://keycloak:9080/realms/sme-finance
+      - SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_OIDC_ISSUER_URI=http://keycloak:9080/auth/realms/sme-finance
       - SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_OIDC_CLIENT_ID=internal
       - SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_OIDC_CLIENT_SECRET=internal
+    depends_on:
+      - sme-finance-account-postgresql
+      - keycloak
 
   sme-finance-account-postgresql:
     image: postgres:14.5
+    container_name: sme-finance-account-postgresql
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=sme-finance-account-db
       - POSTGRES_HOST_AUTH_METHOD=trust
-    restart: always
     ports:
       - "127.0.0.1:5432:5432"
 
-  consul:
-    image: consul:1.13.1
-    # If you want to expose these ports outside your dev PC,
-    # remove the "127.0.0.1:" prefix
+  keycloak-postgresql:
+    image: postgres:${KEYCLOAK_DB_VER:-14.5}
+    container_name: keycloak-postgresql
+    environment:
+      - POSTGRES_DB=${KEYCLOAK_DB_NAME:-keycloak}
+      - POSTGRES_USER=${KEYCLOAK_DB_USER:-keycloak}
+      - POSTGRES_PASSWORD=${KEYCLOAK_DB_PASS:-keycloak}
     ports:
-      - "127.0.0.1:8300:8300"
-      - "127.0.0.1:8500:8500"
-      - "127.0.0.1:8600:8600"
-    command: consul agent -dev -ui -client 0.0.0.0 -log-level=INFO
+      - "127.0.0.1:6432:5432"
+
+  keycloak:
+    image: jboss/keycloak:${KEYCLOAK_VER:-16.1.1}
+    container_name: keycloak
+    volumes:
+      - ./keycloak/realm-config:/opt/jboss/keycloak/realm-config
+      - ./keycloak/standalone-deployments:/opt/jboss/keycloak/standalone/deployments
+    command:
+      [
+        '-b',
+        '0.0.0.0',
+        '-Dkeycloak.migration.action=import',
+        '-Dkeycloak.migration.provider=dir',
+        '-Dkeycloak.migration.dir=/opt/jboss/keycloak/realm-config',
+        '-Dkeycloak.migration.strategy=IGNORE_EXISTING',
+        '-Djboss.socket.binding.port-offset=1000',
+        '-Dkeycloak.profile.feature.upload_scripts=enabled',
+      ]
+    environment:
+      - KEYCLOAK_USER=${KEYCLOAK_USER:-admin}
+      - KEYCLOAK_PASSWORD=${KEYCLOAK_PASS:-admin}
+      - DB_VENDOR=postgres
+      - DB_ADDR=keycloak-postgresql
+      - DB_PORT=5432
+      - DB_USER=${KEYCLOAK_DB_USER:-keycloak}
+      - DB_PASSWORD=${KEYCLOAK_DB_PASS:-keycloak}
+      - KEYCLOAK_STATISTICS=db,http
+    ports:
+      - "127.0.0.1:9080:9080"
+      - "127.0.0.1:9443:9443"
+    depends_on:
+      - keycloak-postgresql
