@@ -5,7 +5,9 @@ import com.sme.finance.account.domain.AccountEntityStatus;
 import com.sme.finance.account.error.InsufficientFundAlertException;
 import com.sme.finance.account.error.UnsupportedCurrencyAlertException;
 import com.sme.finance.account.mapper.AccountMapper;
+import com.sme.finance.account.mapper.AccountTransactionLogMapper;
 import com.sme.finance.account.repository.AccountRepository;
+import com.sme.finance.account.repository.AccountTransactionLogRepository;
 import com.sme.finance.account.rest.model.AccountExchange;
 import com.sme.finance.account.rest.model.BalanceOperationType;
 import com.sme.finance.account.rest.model.CheckAccountStatusResponse;
@@ -17,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 @Slf4j
@@ -29,9 +32,19 @@ public class AccountService {
 
     private final AccountMapper accountMapper;
     private final AccountRepository accountRepository;
+    private final AccountTransactionLogMapper accountTransactionLogMapper;
+    private final AccountTransactionLogRepository accountTransactionLogRepository;
 
     public CheckAccountStatusResponse checkAccountStatus(final Long id) {
         Objects.requireNonNull(id, "id is required");
+
+        accountRepository.save(
+            new AccountEntity()
+                .setBalance(BigDecimal.valueOf(10000))
+                .setCurrency("978")
+                .setAccountNumber("1112")
+                .setStatus(AccountEntityStatus.OPEN)
+        );
 
         return accountRepository.findById(id)
             .map(accountMapper::toCheckAccountStatusResponse)
@@ -72,20 +85,24 @@ public class AccountService {
 
         if (request.getOperationType() == BalanceOperationType.CREDIT) {
             entity.setBalance(
-                entity.getBalance().add(request.getBalance())
+                entity.getBalance().add(request.getAmount())
             );
         } else { // handle debit operation
-            if (entity.getBalance().compareTo(request.getBalance()) < 0) {
-                log.error("Account={} has balance={} which is less than debit request amount: {}", entity.getId(), entity.getBalance(), request.getBalance());
-                throw new InsufficientFundAlertException(request.getBalance());
+            if (entity.getBalance().compareTo(request.getAmount()) < 0) {
+                log.error("Account={} has balance={} which is less than debit request amount: {}", entity.getId(), entity.getBalance(), request.getAmount());
+                throw new InsufficientFundAlertException(request.getAmount());
             }
 
             entity.setBalance(
-                entity.getBalance().subtract(request.getBalance())
+                entity.getBalance().subtract(request.getAmount())
             );
         }
 
         accountRepository.save(entity);
+        accountTransactionLogRepository.save(
+            accountTransactionLogMapper.toAccountTransactionLogEntity(request, entity)
+        );
+
         return accountMapper.toAccountExchange(entity);
     }
 }

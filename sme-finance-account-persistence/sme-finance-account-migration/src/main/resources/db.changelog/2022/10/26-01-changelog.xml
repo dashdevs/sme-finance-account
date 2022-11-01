@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                     https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
 
     <!-- create tables -->
@@ -23,13 +23,45 @@
             <column name="status" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
+            <column name="version" type="BIGINT"/>
         </createTable>
+
+        <createTable tableName="account_transaction_log">
+            <column name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="account_transaction_log_pkey"/>
+            </column>
+            <column name="currency" type="VARCHAR(3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="amount" type="numeric(19, 2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="TIMESTAMP" defaultValue="now">
+                <constraints nullable="false"/>
+            </column>
+            <column name="account_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- create foreign keys -->
+    <changeSet id="1667289444154-1" author="sme-finance-account">
+        <addForeignKeyConstraint baseTableName="account_transaction_log" baseColumnNames="account_id"
+                                 referencedTableName="account" referencedColumnNames="id"
+                                 constraintName="fk_account_id_on_account_transaction_log"/>
     </changeSet>
 
     <!-- create sequence -->
     <changeSet id="1666957411943-1" author="sme-finance-account">
         <createSequence cacheSize="1" cycle="false" dataType="bigint" minValue="1" maxValue="9223372036854775807"
                         sequenceName="ACCOUNT_SEQ" startValue="1" incrementBy="1"/>
+
+        <createSequence cacheSize="1" cycle="false" dataType="bigint" minValue="1" maxValue="9223372036854775807"
+                        sequenceName="ACCOUNT_TRANSACTION_LOG_SEQ" startValue="1" incrementBy="1"/>
     </changeSet>
 
     <!-- create indices -->

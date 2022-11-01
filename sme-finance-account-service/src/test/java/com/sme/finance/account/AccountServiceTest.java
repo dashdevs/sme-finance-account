@@ -5,7 +5,9 @@ import com.sme.finance.account.domain.AccountEntityStatus;
 import com.sme.finance.account.error.InsufficientFundAlertException;
 import com.sme.finance.account.error.UnsupportedCurrencyAlertException;
 import com.sme.finance.account.mapper.AccountMapper;
+import com.sme.finance.account.mapper.AccountTransactionLogMapper;
 import com.sme.finance.account.repository.AccountRepository;
+import com.sme.finance.account.repository.AccountTransactionLogRepository;
 import com.sme.finance.account.rest.model.AccountExchange;
 import com.sme.finance.account.rest.model.BalanceOperationType;
 import com.sme.finance.account.rest.model.CheckAccountStatusResponse;
@@ -21,7 +23,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,6 +36,10 @@ class AccountServiceTest {
     private AccountMapper accountMapper;
     @Mock
     private AccountRepository accountRepository;
+    @Mock
+    private AccountTransactionLogMapper accountTransactionLogMapper;
+    @Mock
+    private AccountTransactionLogRepository accountTransactionLogRepository;
 
     @InjectMocks
     private AccountService accountService;
@@ -133,7 +140,7 @@ class AccountServiceTest {
         UnsupportedCurrencyAlertException exception = assertThrows(UnsupportedCurrencyAlertException.class, () -> accountService.updateAccountBalance(request));
 
         // Then
-        assertEquals("Unsupported currency: Current account doesn't support currency={314}", exception.getLocalizedMessage());
+        assertEquals("Unsupported currency: Account doesn't support currency={314}", exception.getLocalizedMessage());
     }
 
     @Test
@@ -148,7 +155,7 @@ class AccountServiceTest {
         UpdateAccountBalanceRequest request = new UpdateAccountBalanceRequest().id(1L)
             .currency("978")
             .operationType(BalanceOperationType.DEBIT)
-            .balance(BigDecimal.TEN);
+            .amount(BigDecimal.TEN);
 
         // When
         InsufficientFundAlertException exception = assertThrows(InsufficientFundAlertException.class, () -> accountService.updateAccountBalance(request));
@@ -169,7 +176,7 @@ class AccountServiceTest {
         UpdateAccountBalanceRequest request = new UpdateAccountBalanceRequest().id(1L)
             .currency("978")
             .operationType(BalanceOperationType.DEBIT)
-            .balance(BigDecimal.TEN);
+            .amount(BigDecimal.TEN);
 
         // When
         AccountExchange ignored = accountService.updateAccountBalance(request);
@@ -191,7 +198,7 @@ class AccountServiceTest {
         UpdateAccountBalanceRequest request = new UpdateAccountBalanceRequest().id(1L)
             .currency("978")
             .operationType(BalanceOperationType.CREDIT)
-            .balance(BigDecimal.TEN);
+            .amount(BigDecimal.TEN);
 
         // When
         AccountExchange ignored = accountService.updateAccountBalance(request);
