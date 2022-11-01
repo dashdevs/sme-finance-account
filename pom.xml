@@ -83,4 +83,9 @@
         </plugins>
     </build>
 
+    <scm>
+        <tag>sme-finance-account</tag>
+        <developerConnection>scm:git:https://github.com/dashdevs/sme-finance-account.git</developerConnection>
+    </scm>
+
 </project>
